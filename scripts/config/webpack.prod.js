@@ -7,7 +7,7 @@ const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin') //
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const baseConfig = require('./webpack.base')
 
-const prodConfig = {
+let prodConfig = {
   mode: 'production',
   plugins: [
     new CleanWebpackPlugin(),
@@ -71,17 +71,17 @@ const prodConfig = {
     ],
   },
 }
-// if (
-//     process.env.npm_lifecycle_event == 'build:watch' ||
-//     process.env.npm_lifecycle_event == 'build:win' ||
-//     process.env.npm_lifecycle_event == 'build'
-// ) {
-//     prodConfig = merge(prodConfig, {
-//         devtool: 'cheap-source-map'
-//     });
-// }
-// if (process.env.npm_lifecycle_event === 'build:report') {
-//     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-//     prodConfig.plugins.push(new BundleAnalyzerPlugin());
-// }
+if (
+  process.env.npm_lifecycle_event === 'build:watch' ||
+  process.env.npm_lifecycle_event === 'build:win' ||
+  process.env.npm_lifecycle_event === 'build'
+) {
+  prodConfig = merge(prodConfig, {
+    devtool: 'cheap-source-map',
+  })
+}
+if (process.env.npm_lifecycle_event === 'build:report') {
+  const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+  prodConfig.plugins.push(new BundleAnalyzerPlugin())
+}
 module.exports = merge(baseConfig, prodConfig)

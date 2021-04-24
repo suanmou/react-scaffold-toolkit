@@ -14,6 +14,22 @@ const srcDir = path.resolve(PROJECT_PATH, './src')
 const happyThreadPool = HappyPack.ThreadPool({
   size: os.cpus().length,
 })
+const postcssLoaderConfig = {
+  loader: 'postcss-loader',
+  options: {
+    ident: 'postcss',
+    plugins: [
+      require('postcss-preset-env')({
+        autoprefixer: {
+          grid: true,
+          flexbox: 'no-2009',
+        },
+        stage: 3,
+      }),
+    ],
+    sourceMap: isDev,
+  },
+}
 module.exports = {
   entry: {
     // main: ['@babel/polyfill', path.resolve(__dirname, '../src/index.js')]
@@ -30,14 +46,14 @@ module.exports = {
         path: path.resolve(PROJECT_PATH, './dist'), // 必须是绝对路径
       },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.jsx', '.scss', '.less', '.css'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx', '.less', '.scss', '.css'],
     alias: {
       '@': srcDir,
       '@components': path.resolve(PROJECT_PATH, './src/components'),
       // '@utils': path.resolve(PROJECT_PATH, './src/utils'),
       // '@config': path.resolve(PROJECT_PATH, './src/config'),
 
-      // '@assets': path.join(PROJECT_PATH, "../assets"),
+      '@assets': path.join(PROJECT_PATH, './src/assets'),
       // assets: path.join(PROJECT_PATH, "../assets"),
       // src: path.join(PROJECT_PATH, "../src"),
       // app: path.join(PROJECT_PATH, "../src/app"),
@@ -56,61 +72,59 @@ module.exports = {
         exclude: /(node_modules|bower_components)/,
         use: ['happypack/loader?id=happybabel'],
       },
-      // {
-      //     // 编译antd less
-      //     test: /\.less$/,
-      //     include: /node_modules/,
-      //     use: [
-      //         isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
-      //         {
-      //             loader: 'css-loader' // translates CSS into CommonJS
-      //         },
-      //         {
-      //             loader: 'postcss-loader'
-      //         },
-      //         {
-      //             loader: 'less-loader', // compiles Less to CSS
-      //             options: {
-      //                 modifyVars: {
-      //                     //   "@primary-color": "#1899da",
-      //                     '@font-family': 'Arial'
-      //                 }
-      //             }
-      //         }
-      //     ]
-      // },
+      {
+        // 编译antd less
+        test: /\.less$/,
+        include: /node_modules/,
+        use: [
+          isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+          // isDev ? 'style-loader' : { loader: MiniCssExtractPlugin.loader, options: { publicPath: '../../' } },
+
+          {
+            loader: 'css-loader', // translates CSS into CommonJS
+          },
+          postcssLoaderConfig,
+          {
+            loader: 'less-loader', // compiles Less to CSS
+            options: {
+              //
+              javascriptEnabled: true,
+              modifyVars: {
+                // '@primary-color': '#1899da',
+                // '@font-family': 'Arial',
+              },
+            },
+          },
+        ],
+      },
       {
         test: /\.less$/,
         include: [srcDir],
         use: [
-          isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+          isDev
+            ? 'style-loader'
+            : {
+                loader: MiniCssExtractPlugin.loader,
+                options: { publicPath: '../../' }, // css解决引入图片路径问题
+              },
+
           {
             loader: 'css-loader?modules&localIdentName=[path][name]-[local]-[hash:base64:5]',
           },
           // 'postcss-loader',
+          postcssLoaderConfig,
           {
-            loader: 'postcss-loader',
+            loader: 'less-loader', // compiles Less to CSS
             options: {
-              ident: 'postcss',
-              plugins: [
-                require('postcss-preset-env')({
-                  autoprefixer: {
-                    grid: true,
-                    flexbox: 'no-2009',
-                  },
-                  stage: 3,
-                }),
-              ],
-              sourceMap: isDev,
+              javascriptEnabled: true,
             },
           },
-          'less-loader',
         ],
       },
       {
         test: /\.css$/,
-        include: [srcDir],
-        use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
+        // include: [srcDir],
+        use: [isDev ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', postcssLoaderConfig],
       },
       {
         test: /\.(png|jpe?g|gif|svg|bmp)(\?.*)?$/,

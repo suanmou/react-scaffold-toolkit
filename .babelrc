@@ -17,6 +17,19 @@
         ["@babel/plugin-proposal-decorators", { "legacy": true }],
         "babel-plugin-syntax-dynamic-import",
         "transform-class-properties",
-        // ["import", { "libraryName": "antd", "style": true }]
+      //   [
+      //     "import",
+      //     {
+      //         "libraryName": "antd",
+      //         // "libraryDirectory": "es",
+      //         // "style": "css"
+      //         "style": "true"
+
+
+      //     }
+      // ]
+        ["import", { "libraryName": "antd", "style": true }]
+
+
     ]
 }
